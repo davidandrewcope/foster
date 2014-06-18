@@ -8,8 +8,9 @@ go get github.com/cheggaaa/pb
 ## TODO
 - Unit Tests
 - Better output
-    - Show full path in unused file list
+    - Use https://github.com/andrew-d/go-termutil to hide meta output for cleaner piping 
 - More robust guessing for determining if a file is used or not
+    - Handle relative file paths? 
 
 
 ##Warning
