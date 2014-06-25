@@ -80,7 +80,6 @@ func checkUsage(filePath string, f os.FileInfo, err error) error {
 
 	fileStat := FileStat{f, filePath, ""}
 
-	// This should be pretty efficient since we only sniff the first chunk
 	fileStat.contentType = http.DetectContentType([]byte(b))
 
 	//Only search text type files
