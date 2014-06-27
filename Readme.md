@@ -4,6 +4,10 @@ Finds potentially orphaned files in your project.
 
 ## Dependencies
 go get github.com/cheggaaa/pb
+or git submodule update
+
+## Building
+`make`
 
 ## TODO
 - Unit Tests
