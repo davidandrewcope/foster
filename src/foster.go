@@ -9,28 +9,22 @@ import "net/http"
 import "io/ioutil"
 import "github.com/cheggaaa/pb"
 
+import "lib/FileStat"
 
-var sourceFiles []FileStat
 
-var referencedFiles []FileStat
+
+var sourceFiles []filestat.FileStat
+
+var referencedFiles []filestat.FileStat
 
 var bar *pb.ProgressBar
 
 var ignoreFolders []string
 
-type FileStat struct {
-	os.FileInfo
-	path string
-	contentType string
-}
 
-func (f *FileStat) String() string {
-	return fmt.Sprintf("%s", f.path)
-}
-
-func appendIfMissing(slice []FileStat, i FileStat) []FileStat {
+func appendIfMissing(slice []filestat.FileStat, i filestat.FileStat) []filestat.FileStat {
 	for _, ele := range slice {
-		if ele.path == i.path {
+		if ele.Path == i.Path {
 			return slice
 		}
 	}
@@ -50,7 +44,7 @@ func addToSourceList(fileName string, f os.FileInfo, err error) error {
 		return nil
 	}
 
-	sourceFiles = append(sourceFiles, FileStat{f, fileName, ""})
+	sourceFiles = append(sourceFiles, filestat.FileStat{f, fileName, ""})
 
 	return nil
 }
@@ -78,12 +72,12 @@ func checkUsage(filePath string, f os.FileInfo, err error) error {
 	b, err := ioutil.ReadFile(filePath)
 	if err != nil { panic(err) }
 
-	fileStat := FileStat{f, filePath, ""}
+	filestat := filestat.FileStat{f, filePath, ""}
 
-	fileStat.contentType = http.DetectContentType([]byte(b))
+	filestat.ContentType = http.DetectContentType([]byte(b))
 
 	//Only search text type files
-	if ( !strings.Contains( fileStat.contentType , "text") ) {
+	if ( !strings.Contains( filestat.ContentType , "text") ) {
 
 		return nil
 	}
@@ -92,22 +86,13 @@ func checkUsage(filePath string, f os.FileInfo, err error) error {
 	// Anytime we find a reference to a file, add it to our referencedFiles slice
 	for _, sourceFile := range sourceFiles {
 		if strings.Contains(string(b), sourceFile.FileInfo.Name()) {
-			referencedFiles = appendIfMissing(referencedFiles, fileStat)
+			referencedFiles = appendIfMissing(referencedFiles, filestat)
 			//fmt.Printf("Matched string: %s in file: %s\n", sourceFile, filePath)
 			//return nil  don't break on finding a reference
 		}
 	}
 
 	return nil
-}
-
-func fileInSlice(a FileStat, list []FileStat) bool {
-	for _, b := range list {
-		if b.FileInfo.Name() == a.FileInfo.Name() {
-			return true
-		}
-	}
-	return false
 }
 
 func main() {
@@ -167,8 +152,8 @@ func main() {
 		fmt.Printf("Unused Files: \n")
 
 		for _, sourceFile := range sourceFiles {
-			if !fileInSlice(sourceFile, referencedFiles) {
-				fmt.Printf("%s\n", sourceFile.path)
+			if !(sourceFile.NameInSlice(referencedFiles)) {
+				fmt.Printf("%s\n", sourceFile.Path)
 			}
 		}
 	}
@@ -178,7 +163,7 @@ func main() {
 
 
 		for _, referencedFile := range referencedFiles {
-			fmt.Printf("%s\n", referencedFile.path)
+			fmt.Printf("%s\n", referencedFile.Path)
 		}
 	}
 
