@@ -6,7 +6,8 @@ GOPATH := $(shell pwd)
 all:	foster
 
 foster: 
-	go build  -o foster ./src/foster.go
+	go build -a -o foster ./src/foster.go
 
+.PHONY : clean
 clean:
 	rm foster
