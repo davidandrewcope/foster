@@ -1,0 +1,3 @@
+[submodule "src/github.com/cheggaaa/pb"]
+	path = src/github.com/cheggaaa/pb
+	url = https://github.com/cheggaaa/pb.git
