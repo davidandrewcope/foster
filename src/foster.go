@@ -99,10 +99,14 @@ func main() {
 
 
 	//Collect the arguments
-	basePath := flag.String("base", ".", "Site root folder")
+	basePath := flag.String("base", "", "The root folder of your project tree")
 	showUsed := *flag.Bool("used", false, "Show used files instead of unused files")
-	ignoreFoldersArgs := strings.Split(*flag.String("ignoreFolders", ".", "CSV list of folders to skip"), ",")
+	ignoreFoldersArgs := strings.Split(*flag.String("ignoreFolders", "", "CSV list of folders to ignore"), ",")
 
+	if *basePath == "" {
+	    flag.PrintDefaults()
+	    os.Exit(2)
+	}
 	//Cleanup formatting of ignored folders
 	for _, ignoreFoldersArg := range ignoreFoldersArgs {
 		ignoreFolders = append(ignoreFolders, strings.TrimSpace(ignoreFoldersArg))
