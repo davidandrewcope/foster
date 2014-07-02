@@ -19,6 +19,7 @@ var bar *pb.ProgressBar
 
 var ignoreFolders []string
 
+
 func appendIfMissing(slice []filestat.FileStat, i filestat.FileStat) []filestat.FileStat {
 	for _, ele := range slice {
 		if ele.Path == i.Path {
@@ -100,17 +101,18 @@ func main() {
 	basePath := flag.String("base", "", "The root folder of your project tree")
 	showUsed := *flag.Bool("used", false, "Show used files instead of unused files")
 	ignoreFoldersArgs := strings.Split(*flag.String("ignoreFolders", "", "CSV list of folders to ignore"), ",")
-
-	if *basePath == "" {
-		flag.PrintDefaults()
-		os.Exit(2)
-	}
+	flag.Parse()
+	
 	//Cleanup formatting of ignored folders
 	for _, ignoreFoldersArg := range ignoreFoldersArgs {
 		ignoreFolders = append(ignoreFolders, strings.TrimSpace(ignoreFoldersArg))
 	}
 
-	flag.Parse()
+	//Reject and empty basePath
+	if len(*basePath) < 1 {
+		flag.PrintDefaults()
+		os.Exit(2)
+	}
 
 	fmt.Printf("Crawling directory: %s\n", *basePath)
 
