@@ -11,8 +11,6 @@ import "github.com/cheggaaa/pb"
 
 import "lib/FileStat"
 
-
-
 var sourceFiles []filestat.FileStat
 
 var referencedFiles []filestat.FileStat
@@ -20,7 +18,6 @@ var referencedFiles []filestat.FileStat
 var bar *pb.ProgressBar
 
 var ignoreFolders []string
-
 
 func appendIfMissing(slice []filestat.FileStat, i filestat.FileStat) []filestat.FileStat {
 	for _, ele := range slice {
@@ -31,8 +28,8 @@ func appendIfMissing(slice []filestat.FileStat, i filestat.FileStat) []filestat.
 	return append(slice, i)
 }
 
-func isExcludedPath(filePath string) bool{
-	return strings.Contains( filePath, ".git")
+func isExcludedPath(filePath string) bool {
+	return strings.Contains(filePath, ".git")
 }
 
 func addToSourceList(fileName string, f os.FileInfo, err error) error {
@@ -51,7 +48,7 @@ func addToSourceList(fileName string, f os.FileInfo, err error) error {
 
 func checkUsage(filePath string, f os.FileInfo, err error) error {
 
-	bar.Increment();
+	bar.Increment()
 
 	if f.IsDir() {
 		return nil
@@ -63,21 +60,23 @@ func checkUsage(filePath string, f os.FileInfo, err error) error {
 
 	//Skip any folders passed in the ignoreFolders args
 	for _, ignoredFolder := range ignoreFolders {
-		if (strings.Contains(filePath, "/" + ignoredFolder )) {
-			return nil;
+		if strings.Contains(filePath, "/"+ignoredFolder) {
+			return nil
 		}
 	}
 
 	// read the whole file
 	b, err := ioutil.ReadFile(filePath)
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 
 	filestat := filestat.FileStat{f, filePath, ""}
 
 	filestat.ContentType = http.DetectContentType([]byte(b))
 
 	//Only search text type files
-	if ( !strings.Contains( filestat.ContentType , "text") ) {
+	if !strings.Contains(filestat.ContentType, "text") {
 
 		return nil
 	}
@@ -97,15 +96,14 @@ func checkUsage(filePath string, f os.FileInfo, err error) error {
 
 func main() {
 
-
 	//Collect the arguments
 	basePath := flag.String("base", "", "The root folder of your project tree")
 	showUsed := *flag.Bool("used", false, "Show used files instead of unused files")
 	ignoreFoldersArgs := strings.Split(*flag.String("ignoreFolders", "", "CSV list of folders to ignore"), ",")
 
 	if *basePath == "" {
-	    flag.PrintDefaults()
-	    os.Exit(2)
+		flag.PrintDefaults()
+		os.Exit(2)
 	}
 	//Cleanup formatting of ignored folders
 	for _, ignoreFoldersArg := range ignoreFoldersArgs {
@@ -115,7 +113,6 @@ func main() {
 	flag.Parse()
 
 	fmt.Printf("Crawling directory: %s\n", *basePath)
-
 
 	err := filepath.Walk(*basePath, addToSourceList)
 
@@ -131,10 +128,9 @@ func main() {
 
 	fmt.Printf("Found %d files, searching for usages.\n", len(sourceFiles))
 
-
 	//The parsing is done via a channel
 	done := make(chan bool)
-	go func () {
+	go func() {
 		err := filepath.Walk(*basePath, checkUsage)
 
 		if err != nil {
@@ -151,8 +147,7 @@ func main() {
 
 	fmt.Printf("\n\n")
 
-
-	if (!showUsed) {
+	if !showUsed {
 		fmt.Printf("Unused Files: \n")
 
 		for _, sourceFile := range sourceFiles {
@@ -162,9 +157,8 @@ func main() {
 		}
 	}
 
-	if (showUsed) {
+	if showUsed {
 		fmt.Printf("Used Files: \n")
-
 
 		for _, referencedFile := range referencedFiles {
 			fmt.Printf("%s\n", referencedFile.Path)

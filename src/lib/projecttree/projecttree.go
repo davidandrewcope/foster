@@ -1,18 +1,17 @@
 package projectree
 
 import (
-	"strings"
 	"lib/filestat"
+	"strings"
 )
 
 type ProjectTree struct {
-	BasePath string
-	SourceFiles []filestat.FileStat
+	BasePath               string
+	SourceFiles            []filestat.FileStat
 	ExcludedSourcePatterns []string
 }
 
-
-func (pt *ProjectTree) IsExcludedPath( fileName string) bool {
+func (pt *ProjectTree) IsExcludedPath(fileName string) bool {
 	for _, pat := range pt.ExcludedSourcePatterns {
 		//TODO: add some robustness here... first convert to an os.FileInfo then get the basename and then check the pattern
 		if strings.Contains(fileName, pat) {
