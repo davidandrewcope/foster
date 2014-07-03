@@ -18,7 +18,10 @@ all:	compile
 
 compile: 
 	go build -a -o $(BIN_PATH)/$(BIN_NAME) ./src/foster.go
-	
+
+.PHONY: test
+test:
+	go test ./src/lib/...
 .PHONY: fmt
 fmt:	
 	go fmt ./src/foster.go

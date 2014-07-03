@@ -9,7 +9,7 @@ type FileStat struct {
 	os.FileInfo
 	Path        string
 	ContentType string
-	//ReferencingFiles []FileStat
+	ReferencingFiles []FileStat
 
 }
 
@@ -25,3 +25,14 @@ func (a *FileStat) NameInSlice(list []FileStat) bool {
 	}
 	return false
 }
+
+func (f *FileStat) AppendReference(i FileStat) bool {
+	for _, ele := range f.ReferencingFiles {
+		if ele.Path == i.Path {
+			return false
+		}
+	}
+	f.ReferencingFiles = append(f.ReferencingFiles, i)
+	return true
+}
+
