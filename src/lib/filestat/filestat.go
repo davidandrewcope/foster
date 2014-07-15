@@ -14,7 +14,7 @@ type FileStat struct {
 }
 
 func (f *FileStat) String() string {
-	return fmt.Sprintf("%s", f.Path)
+	return fmt.Sprintf("%v", f.Path)
 }
 
 func (a *FileStat) NameInSlice(list []FileStat) bool {

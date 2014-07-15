@@ -29,3 +29,21 @@ func TestFileStatStringPrintsPath(t *testing.T) {
 		t.Errorf("Expected FileStat.String() longer than 1 letter , was: %v", len(filestat.String()))
 	}
 }
+
+func TestAppendReference(t *testing.T) {
+
+	filestat1 := FileStat{nil, "/test/file/1", "", []FileStat{}}
+	filestat2 := FileStat{nil, "/test/file/2", "", []FileStat{}}
+	
+	filestat1.AppendReference(filestat2);
+	
+	if len(filestat1.ReferencingFiles) < 1 {
+		t.Errorf("Expected filestat1.ReferencingFiles longer than 1 , was: %v", len(filestat1.ReferencingFiles))
+	}
+	
+	if (filestat1.ReferencingFiles[0].Path != "/test/file/2") {
+		t.Errorf("Expected filestat1.ReferencingFiles[0].Path == '/test/file/2', was: %v", filestat1.ReferencingFiles[0].Path)
+	}
+	
+	
+}

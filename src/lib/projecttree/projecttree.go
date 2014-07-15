@@ -88,11 +88,11 @@ func (pt *ProjectTree) CheckUsage(filePath string, f os.FileInfo, err error) err
 
 	//Check for matches in this chunk from our sourceFiles list
 	// Anytime we find a reference to a file, add it to our referencedFiles slice
-	for _, sourceFile := range pt.SourceFiles {
-		if strings.Contains(string(b), sourceFile.FileInfo.Name()) {
-			sourceFile.AppendReference(filestat);
+	for i, _ := range pt.SourceFiles {
+		if strings.Contains(string(b), pt.SourceFiles[i].FileInfo.Name()) {
+			pt.SourceFiles[i].AppendReference(filestat);
 			
-			//fmt.Printf("Matched string: %s in file: %s\n", sourceFile, filePath)
+			//fmt.Printf("Matched string: %s in file: %s\n", pt.SourceFiles[i].FileInfo.Name(), string(b))
 			//return nil  don't break on finding a reference
 		}
 	}

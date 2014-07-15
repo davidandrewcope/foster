@@ -21,7 +21,7 @@ compile:
 
 .PHONY: test
 test:
-	go test ./src/lib/...
+	go test -v ./src/lib/...
 .PHONY: fmt
 fmt:	
 	go fmt ./src/foster.go
