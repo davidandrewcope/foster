@@ -4,12 +4,8 @@ import "fmt"
 import "flag"
 import "os"
 import "path/filepath"
-import "github.com/cheggaaa/pb"
 
 import "lib/ProjectTree"
-
-
-var bar *pb.ProgressBar
 
 
 //Declare the ProjectTree
@@ -41,12 +37,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("\n")
-	
-	
-
-	bar = pb.StartNew(len(projectTree.SourceFiles))
-	bar.ShowTimeLeft = false
 
 	fmt.Printf("Found %d files, searching for usages.\n", len(projectTree.SourceFiles))
 
@@ -65,39 +55,14 @@ func main() {
 
 	<-done
 
-	bar.Finish()
+	
 
 	fmt.Printf("\n\n")
-
-	if !showUsed {
-		fmt.Printf("Unused Files: \n")
-
-		for _, sourceFile := range projectTree.SourceFiles {
-			if (len(sourceFile.ReferencingFiles) > 0) {
-			//if !(sourceFile.NameInSlice(referencedFiles)) {
-				fmt.Printf("%s\n", sourceFile.Path)
-			}
-		}
-	}
-
 	if showUsed {
-		fmt.Printf("Used Files: \n")
-		for _, sourceFile := range projectTree.SourceFiles {
-			if (len(sourceFile.ReferencingFiles) == 0) {
-				fmt.Printf("%s\n", sourceFile.Path)
-			}
-		}
-		
-		//for _, referencedFile := range projectTree referencedFiles {
-		//	fmt.Printf("%s\n", referencedFile.Path)
-		//}
+		projectTree.PrintUsedFiles();
+	} else {
+		projectTree.PrintUnUsedFiles();
 	}
-	
-	for _, sourceFile := range projectTree.SourceFiles {
-		
-		
-			fmt.Printf("%v\n", sourceFile)
-		
-	}
+
 
 }

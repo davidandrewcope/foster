@@ -7,12 +7,17 @@ import (
 	"path/filepath"
 	"io/ioutil"
 	"net/http"
+	"fmt"
+	
+	"github.com/cheggaaa/pb"
 )
+
 
 type ProjectTree struct {
 	BasePath               string
 	SourceFiles            []filestat.FileStat
 	ExcludedSourcePatterns []string
+	ProgressBar				*pb.ProgressBar
 }
 
 
@@ -59,8 +64,7 @@ func (pt *ProjectTree) appendSourceFile(fileName string, f os.FileInfo, err erro
  * Append sorce file if they meet our criteria, this is called by a directory walker
  */
 func (pt *ProjectTree) CheckUsage(filePath string, f os.FileInfo, err error) error {
-
-	//bar.Increment() //TODO: need a way to call this, ideas?
+	pt.ProgressBar.Increment() 
 	
 	if f.IsDir() {
 		return nil
@@ -101,16 +105,43 @@ func (pt *ProjectTree) CheckUsage(filePath string, f os.FileInfo, err error) err
 }
 
 
-
-
 func (pt *ProjectTree) BuildSourceFileList() error {
-	return filepath.Walk(pt.BasePath, pt.appendSourceFile)
+	walkResult := filepath.Walk(pt.BasePath, pt.appendSourceFile)
+	
+	pt.ProgressBar = pb.StartNew(len(pt.SourceFiles))
+	pt.ProgressBar.ShowTimeLeft = false
+	
+	return walkResult
+}
+
+func (pt *ProjectTree) PrintUsedFiles() {
+	pt.ProgressBar.Finish()
+	
+	fmt.Printf("Used Files: \n")
+	for _, sourceFile := range pt.SourceFiles {
+		if (len(sourceFile.ReferencingFiles) == 0) {
+			fmt.Printf("%s\n", sourceFile.Path)
+		}
+	}
+}
+
+func (pt *ProjectTree) PrintUnUsedFiles() {
+	pt.ProgressBar.Finish()
+	
+	fmt.Printf("Unused Files: \n")
+	for _, sourceFile := range pt.SourceFiles {
+		if (len(sourceFile.ReferencingFiles) > 0) {
+		//if !(sourceFile.NameInSlice(referencedFiles)) {
+			fmt.Printf("%s\n", sourceFile.Path)
+		}
+	}
 }
 
 func New(basePath string, ignoreFolderArgs string) *ProjectTree {
 	pt := new(ProjectTree)
 	pt.BasePath = basePath;
 	pt.ExcludedSourcePatterns = []string{};
+	
 	
 	//Cleanup formatting of ignored folders
 	for _, ignoreFoldersArg := range strings.Split(ignoreFolderArgs, ",") {
