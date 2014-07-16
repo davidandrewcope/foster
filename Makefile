@@ -12,12 +12,20 @@ prefix = /usr/local
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_PREFIX = $(prefix)
-
+SOURCES = $(wildcard *.go) $(wildcard **/*.go)
 
 all:	compile
 
 compile: 
 	go build -a -o $(BIN_PATH)/$(BIN_NAME) ./src/foster.go
+
+.PHONY: test
+test:
+	go test -v ./src/lib/...
+.PHONY: fmt
+fmt:	
+	go fmt ./src/foster.go
+	go fmt ./src/lib/...
 	
 # Installs to the set path
 .PHONY: install
