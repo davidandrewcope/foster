@@ -5,7 +5,8 @@ import (
 	"strings"
 	"os"
 	"path/filepath"
-	"io/ioutil"
+	"bufio"
+	"io"
 	"net/http"
 	"fmt"
 	
@@ -74,27 +75,62 @@ func (pt *ProjectTree) CheckUsage(filePath string, f os.FileInfo, err error) err
 		return nil
 	}
 
-	// read the whole file
-	b, err := ioutil.ReadFile(filePath)
+	//Open the file
+	fi, err := os.Open(filePath)
 	if err != nil {
 		panic(err)
 	}
+	
+	//Initialize a filestat struct, this may be discarded if we are not reading a text type file
+	fileStat := filestat.FileStat{} 
+	
+	// close fi on exit and check for its returned error
+    defer func() {
+        if err := fi.Close(); err != nil {
+            panic(err)
+        }
+    }()
+	
+	// make a read buffer
+    r := bufio.NewReader(fi)
+	
+	// make a buffer to keep chunks that are read
+    buf := make([]byte, 1024)
+	
+	// make a chunk slice to hold the all the chunks as string
+	chunks := []string{}
+	
+    for i := 0; ; i++ {
+        // read a chunk
+        n, err := r.Read(buf)
+        if err != nil && err != io.EOF { panic(err) }
+        if n == 0 { break }
+		
+		chunks = append(chunks, string(buf[:n]) )
+		
+		// We should only need the first chunk to detect the contentType
+		if i == 0 {
+			contentType := http.DetectContentType([]byte(buf[:n]))
+			
+			//Only search text type files
+			if !strings.Contains(contentType, "text") {
+				//Break out here if we are not reading a text file
+				return nil
+			} 
+			
+			//File was text so create the FileStat object
+			fileStat = filestat.FileStat{f, filePath, contentType, []filestat.FileStat{}}
 
-	filestat := filestat.FileStat{f, filePath, "", []filestat.FileStat{}}
-
-	filestat.ContentType = http.DetectContentType([]byte(b))
-
-	//Only search text type files
-	if !strings.Contains(filestat.ContentType, "text") {
-
-		return nil
-	}
+		}
+        
+    }
+		
 
 	//Check for matches in this chunk from our sourceFiles list
 	// Anytime we find a reference to a file, add it to our referencedFiles slice
 	for i, _ := range pt.SourceFiles {
-		if strings.Contains(string(b), pt.SourceFiles[i].FileInfo.Name()) {
-			pt.SourceFiles[i].AppendReference(filestat);
+		if strings.Contains(strings.Join(chunks, ""), pt.SourceFiles[i].FileInfo.Name()) {
+			pt.SourceFiles[i].AppendReference(fileStat);
 			
 			//fmt.Printf("Matched string: %s in file: %s\n", pt.SourceFiles[i].FileInfo.Name(), string(b))
 			//return nil  don't break on finding a reference
@@ -119,12 +155,12 @@ func (pt *ProjectTree) BuildSourceFileList() error {
 /**
  * End the progress bar timer, and print the used files in the project
  */
-func (pt *ProjectTree) PrintUsedFiles() {
+func (pt *ProjectTree) PrintUnUsedFiles() {
 	pt.ProgressBar.Finish()
 	
-	fmt.Printf("Used Files: \n")
+	fmt.Printf("UnUsed Files: \n")
 	for _, sourceFile := range pt.SourceFiles {
-		if (len(sourceFile.ReferencingFiles) == 0) {
+		if (len(sourceFile.ReferencingFiles) == 0) && !strings.Contains(sourceFile.ContentType, "text") {  //Need a flag to print text files
 			fmt.Printf("%s\n", sourceFile.Path)
 		}
 	}
@@ -133,13 +169,12 @@ func (pt *ProjectTree) PrintUsedFiles() {
 /**
  * End the progress bar timer, and print the UNused files in the project
  */
-func (pt *ProjectTree) PrintUnUsedFiles() {
+func (pt *ProjectTree) PrintUsedFiles() {
 	pt.ProgressBar.Finish()
 	
-	fmt.Printf("Unused Files: \n")
+	fmt.Printf("Used Files: \n")
 	for _, sourceFile := range pt.SourceFiles {
 		if (len(sourceFile.ReferencingFiles) > 0) {
-		//if !(sourceFile.NameInSlice(referencedFiles)) {
 			fmt.Printf("%s\n", sourceFile.Path)
 		}
 	}

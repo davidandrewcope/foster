@@ -15,9 +15,6 @@ or git submodule update
     - Use https://github.com/andrew-d/go-termutil to hide meta output for cleaner piping 
 - More robust guessing for determining if a file is used or not
     - Handle relative file paths? 
-- ioutil.ReadFile is faster on bunches of small file, but a streaming 
-    reader my speed up content detection prior to parsing large files
-    -- Maybe we test this, and delegate to a reader based on file size
 
 ## Known Issues
 - Any top level file will be picked up
