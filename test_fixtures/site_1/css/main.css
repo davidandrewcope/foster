@@ -1,0 +1,4 @@
+/* Just a simple css file with a relative reference to a gif */
+.body {
+	background-image: url("images/used_by_main_css.gif");
+}
