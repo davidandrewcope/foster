@@ -104,7 +104,9 @@ func (pt *ProjectTree) CheckUsage(filePath string, f os.FileInfo, err error) err
 	return nil
 }
 
-
+/**
+ * Kick off the directory walking function to build up a list of source files in the project
+ */
 func (pt *ProjectTree) BuildSourceFileList() error {
 	walkResult := filepath.Walk(pt.BasePath, pt.appendSourceFile)
 	
@@ -114,6 +116,9 @@ func (pt *ProjectTree) BuildSourceFileList() error {
 	return walkResult
 }
 
+/**
+ * End the progress bar timer, and print the used files in the project
+ */
 func (pt *ProjectTree) PrintUsedFiles() {
 	pt.ProgressBar.Finish()
 	
@@ -125,6 +130,9 @@ func (pt *ProjectTree) PrintUsedFiles() {
 	}
 }
 
+/**
+ * End the progress bar timer, and print the UNused files in the project
+ */
 func (pt *ProjectTree) PrintUnUsedFiles() {
 	pt.ProgressBar.Finish()
 	
@@ -137,6 +145,9 @@ func (pt *ProjectTree) PrintUnUsedFiles() {
 	}
 }
 
+/**
+ * Initialize a ProjectTree struct
+ */
 func New(basePath string, ignoreFolderArgs string) *ProjectTree {
 	pt := new(ProjectTree)
 	pt.BasePath = basePath;
